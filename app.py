@@ -314,7 +314,9 @@ def predict_segment(recency: float, frequency: float, monetary: float,
         [[recency, frequency, monetary]],
         columns=["Recency", "Frequency", "Monetary"]
     )
-    input_log  = np.log1p(input_df)   # scaler was fitted on log-transformed data
+    # Scaler was fitted on log-transformed columns named Recency_log, Frequency_log, Monetary_log
+    input_log = np.log1p(input_df)
+    input_log.columns = ["Recency_log", "Frequency_log", "Monetary_log"]
     scaled     = scaler.transform(input_log)
     cluster_id = int(kmeans.predict(scaled)[0])
     segment    = label_map.get(cluster_id, f"Cluster {cluster_id}")
