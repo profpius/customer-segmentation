@@ -517,7 +517,7 @@ def sidebar_nav() -> str:
 # PAGE — OVERVIEW
 # ─────────────────────────────────────────────
 def page_overview(df: pd.DataFrame):
-    st.markdown('<p class="section-label">Customer Intelligence Platform</p>',
+    st.markdown('<p class="section-label">Customer Segmentation Platform</p>',
                 unsafe_allow_html=True)
     st.markdown('<h1 class="display-heading">Segment your<br>customers.</h1>',
                 unsafe_allow_html=True)
