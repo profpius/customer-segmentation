@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-KMeans-orange?style=flat-square)
-![Streamlit](https://img.shields.io/badge/Streamlit-App-red?style=flat-square)
+[![Streamlit App](https://img.shields.io/badge/Streamlit-App-red?style=flat-square&logo=streamlit)](https://customer-segmentation-pius.streamlit.app/)
 ![Dataset](https://img.shields.io/badge/Dataset-UCI%20Online%20Retail%20II-lightgrey?style=flat-square)
 
 A customer segmentation project built on real transactional data from a UK-based online retailer. The goal was to group ~5,800 customers into meaningful segments based on how recently they bought, how often they buy, and how much they spend — then use those segments to recommend business actions.
@@ -108,6 +108,8 @@ The most notable finding is that over a third of the customer base had already g
 ---
 
 ## Streamlit App
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://customer-segmentation-pius.streamlit.app/)
 
 The app lets you input Recency, Frequency, and Monetary values for any customer and get an instant segment prediction.
 
