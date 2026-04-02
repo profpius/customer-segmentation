@@ -483,7 +483,7 @@ def sidebar_nav() -> str:
         <div style='padding: 1.2rem 0 0.5rem;'>
             <span style='font-family:Syne,sans-serif;font-weight:800;
                          font-size:1.25rem;color:#fff;letter-spacing:-0.02em;'>
-                🧭 SegmentIQ
+                🧭 Customer Segmentation
             </span><br>
             <span style='font-size:0.75rem;color:#666;'>
                 RFM · KMeans · Customer Intelligence
