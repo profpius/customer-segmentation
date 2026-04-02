@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/Python-3.13-blue?style=flat-square)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-KMeans-orange?style=flat-square)
 [![Streamlit App](https://img.shields.io/badge/Streamlit-App-red?style=flat-square&logo=streamlit)](https://customer-segmentation-pius.streamlit.app/)
-![Dataset](https://img.shields.io/badge/Dataset-UCI%20Online%20Retail%20II-lightgrey?style=flat-square)
+[![Dataset](https://img.shields.io/badge/Dataset-UCI%20Online%20Retail%20II-lightgrey?style=flat-square&logo=kaggle&logoColor=20BEFF)](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci/data)
 
 A customer segmentation project built on real transactional data from a UK-based online retailer. The goal was to group ~5,800 customers into meaningful segments based on how recently they bought, how often they buy, and how much they spend, and then use those segments to recommend business actions.
 
@@ -17,7 +17,7 @@ Customer segmentation made sense as a next step. Instead of predicting a single 
 
 ## The Dataset
 
-**UCI Online Retail II:** transactional records from a UK-based online retailer (2009–2011).
+**[UCI Online Retail II](https://www.kaggle.com/datasets/mashlyn/online-retail-ii-uci/data):** transactional records from a UK-based online retailer (2009–2011).
 
 | | |
 |---|---|
