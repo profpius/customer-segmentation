@@ -391,7 +391,7 @@ def chart_scatter(df: pd.DataFrame, highlight: dict | None = None):
     for i, seg in enumerate(seg_list):
         sub = df[df["Segment"] == seg]
         ax.scatter(sub["Frequency"], sub["Monetary"],
-                   color=list(SEGMENT_CONFIG[seg]["bg"]),  # light bg colour
+                   color=SEGMENT_CONFIG[seg]["bg"],
                    edgecolors=SEGMENT_CONFIG[seg]["color"],
                    linewidths=0.8, s=28, alpha=0.75, label=seg)
 
