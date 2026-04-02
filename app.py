@@ -494,7 +494,7 @@ def sidebar_nav() -> str:
 
         page = st.radio(
             "Navigate",
-            ["🏠  Overview", "🔍  Predict Segment",
+            ["🏠  Overview", "🔍  Predict Segment", "📂  Batch Predict",
              "📊  Cluster Insights", "📈  Visualisations"],
             label_visibility="collapsed",
         )
@@ -826,6 +826,138 @@ def page_viz(df: pd.DataFrame):
 
 
 # ─────────────────────────────────────────────
+# PAGE — BATCH PREDICT
+# ─────────────────────────────────────────────
+def page_batch(kmeans, scaler, label_map):
+    st.markdown('<p class="section-label">Batch Predict</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="display-heading">Segment your list.</h1>',
+                unsafe_allow_html=True)
+    st.markdown('<p class="display-sub">Upload a CSV with customer RFM values '
+                'and download the results with segments assigned.</p>',
+                unsafe_allow_html=True)
+    st.markdown("<hr class='thin-divider'>", unsafe_allow_html=True)
+
+    # ── Instructions ──
+    st.markdown('<p class="section-label">Required format</p>', unsafe_allow_html=True)
+    st.markdown("""
+    <div class="insight-block">
+        <h4>CSV must contain these three columns (headers are case-sensitive):</h4>
+        <p><code>Recency</code> — days since last purchase (integer)<br>
+           <code>Frequency</code> — number of orders (integer)<br>
+           <code>Monetary</code> — total spend in £ (decimal)</p>
+        <p>Any additional columns (e.g. Customer ID, Name) will be kept and passed through.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Sample download ──
+    sample_df = pd.DataFrame({
+        "Customer ID": ["C001", "C002", "C003", "C004", "C005"],
+        "Recency":     [15,     90,     200,    45,     310],
+        "Frequency":   [14,     6,      3,      2,      1],
+        "Monetary":    [2100,   450,    280,    130,    60],
+    })
+    st.download_button(
+        "⬇️ Download sample CSV template",
+        data=sample_df.to_csv(index=False).encode(),
+        file_name="rfm_template.csv",
+        mime="text/csv",
+    )
+
+    st.markdown("<hr class='thin-divider'>", unsafe_allow_html=True)
+
+    # ── File uploader ──
+    st.markdown('<p class="section-label">Upload your file</p>', unsafe_allow_html=True)
+    uploaded = st.file_uploader("Choose a CSV file", type=["csv"])
+
+    if uploaded is None:
+        st.markdown("""
+        <div style='padding:2.5rem 1rem;text-align:center;color:#bbb;'>
+            <div style='font-size:2.5rem;'>📂</div>
+            <p style='font-size:0.9rem;margin-top:0.8rem;'>
+                Upload a CSV above to get started.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        return
+
+    try:
+        df_in = pd.read_csv(uploaded)
+    except Exception as e:
+        st.error(f"Could not read file: {e}")
+        return
+
+    # ── Validate columns ──
+    required = {"Recency", "Frequency", "Monetary"}
+    missing_cols = required - set(df_in.columns)
+    if missing_cols:
+        st.error(f"❌ Missing required columns: {', '.join(missing_cols)}")
+        return
+
+    # ── Check for nulls ──
+    null_counts = df_in[["Recency", "Frequency", "Monetary"]].isnull().sum()
+    if null_counts.any():
+        st.warning(f"⚠️ Rows with missing RFM values will be skipped: "
+                   f"{null_counts[null_counts > 0].to_dict()}")
+        df_in = df_in.dropna(subset=["Recency", "Frequency", "Monetary"])
+
+    if df_in.empty:
+        st.error("No valid rows remaining after removing nulls.")
+        return
+
+    # ── Preview ──
+    st.markdown('<p class="section-label">Preview (first 5 rows)</p>',
+                unsafe_allow_html=True)
+    st.dataframe(df_in.head(), use_container_width=True)
+
+    # ── Run predictions ──
+    with st.spinner("Segmenting customers…"):
+        rfm_vals = df_in[["Recency", "Frequency", "Monetary"]].copy()
+        log_vals = np.log1p(rfm_vals)
+        log_vals.columns = ["Recency_log", "Frequency_log", "Monetary_log"]
+        scaled = scaler.transform(log_vals)
+        cluster_ids = kmeans.predict(scaled)
+        segments = [label_map.get(int(c), f"Cluster {c}") for c in cluster_ids]
+
+    df_out = df_in.copy()
+    df_out["Cluster"]  = cluster_ids
+    df_out["Segment"]  = segments
+
+    # ── Results summary ──
+    st.markdown("<hr class='thin-divider'>", unsafe_allow_html=True)
+    st.markdown('<p class="section-label">Segment breakdown</p>', unsafe_allow_html=True)
+
+    seg_counts = df_out["Segment"].value_counts()
+    total = len(df_out)
+    cols = st.columns(len(SEGMENT_CONFIG))
+    for col, (seg, cfg) in zip(cols, SEGMENT_CONFIG.items()):
+        count = seg_counts.get(seg, 0)
+        pct   = count / total * 100
+        col.markdown(f"""
+        <div class="stat-card" style="border-left:5px solid {cfg['color']};text-align:center;">
+            <div style='font-size:1.4rem;'>{cfg['emoji']}</div>
+            <h3 style='font-size:1.3rem;color:{cfg['color']};margin:4px 0;'>{count:,}</h3>
+            <p style='font-size:0.78rem;'>{seg}<br>
+               <span style='color:#aaa;'>{pct:.1f}%</span></p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ── Full results table ──
+    st.markdown("<hr class='thin-divider'>", unsafe_allow_html=True)
+    st.markdown('<p class="section-label">Full results</p>', unsafe_allow_html=True)
+    st.dataframe(df_out, use_container_width=True)
+
+    # ── Download ──
+    csv_bytes = df_out.to_csv(index=False).encode()
+    st.download_button(
+        "⬇️ Download segmented CSV",
+        data=csv_bytes,
+        file_name="customer_segments_batch.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+
+# ─────────────────────────────────────────────
 # MAIN
 # ─────────────────────────────────────────────
 def main():
@@ -857,6 +989,12 @@ def main():
             st.error("❌ Model files not found. Cannot run predictions.")
         else:
             page_predict(kmeans, scaler, label_map, df_demo)
+
+    elif page == "📂  Batch Predict":
+        if kmeans is None:
+            st.error("❌ Model files not found. Cannot run predictions.")
+        else:
+            page_batch(kmeans, scaler, label_map)
 
     elif page == "📊  Cluster Insights":
         page_insights(df_demo)
